@@ -1,0 +1,101 @@
+{
+  "nbformat": 4,
+  "nbformat_minor": 0,
+  "metadata": {
+    "colab": {
+      "provenance": [],
+      "authorship_tag": "ABX9TyME6NAKdn5vAokl1h87ZuSK",
+      "include_colab_link": true
+    },
+    "kernelspec": {
+      "name": "python3",
+      "display_name": "Python 3"
+    },
+    "language_info": {
+      "name": "python"
+    }
+  },
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "view-in-github",
+        "colab_type": "text"
+      },
+      "source": [
+        "<a href=\"https://colab.research.google.com/github/sasikumar1591/SPIC440-192124064/blob/main/accuracy%20for%20KNN\" target=\"_parent\"><img src=\"https://colab.research.google.com/assets/colab-badge.svg\" alt=\"Open In Colab\"/></a>"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": 16,
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "VY18yP2h9IBL",
+        "outputId": "f92ac1bb-5b99-46fa-8808-f799959a53b1"
+      },
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Accuracy: 0.8\n",
+            "Classification Report:\n",
+            "               precision    recall  f1-score   support\n",
+            "\n",
+            "           0       1.00      0.50      0.67         2\n",
+            "           1       0.75      1.00      0.86         3\n",
+            "\n",
+            "    accuracy                           0.80         5\n",
+            "   macro avg       0.88      0.75      0.76         5\n",
+            "weighted avg       0.85      0.80      0.78         5\n",
+            "\n"
+          ]
+        }
+      ],
+      "source": [
+        "import numpy as np\n",
+        "import pandas as pd\n",
+        "from sklearn.model_selection import train_test_split\n",
+        "from sklearn.neighbors import KNeighborsClassifier\n",
+        "from sklearn.metrics import accuracy_score, classification_report\n",
+        "\n",
+        "# Load your historical gold price data into a Pandas DataFrame\n",
+        "# Replace 'dataset.xlsx' with your data file or source\n",
+        "data = pd.read_excel('dataset.xlsx')\n",
+        "\n",
+        "# Create a binary target variable based on some condition (e.g., price going up or down)\n",
+        "data['Price_Direction'] = np.where(data['Price'].shift(-1) > data['Price'], 1,0)\n",
+        "\n",
+        "# Drop the last row with NaN value created by the shift operation\n",
+        "data = data.dropna()\n",
+        "\n",
+        "# Drop non-essential columns ('Date') and ensure all other columns are numeric\n",
+        "data = data.select_dtypes(include=[np.number])\n",
+        "\n",
+        "# Split the data into features (X) and the target variable (y)\n",
+        "X = data.drop(['Price_Direction'], axis=1)\n",
+        "y = data['Price_Direction']\n",
+        "\n",
+        "# Split the data into training and testing sets\n",
+        "X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=40)\n",
+        "\n",
+        "# Create and fit the KNN model\n",
+        "model = KNeighborsClassifier(n_neighbors=5)  # You can adjust the number of neighbors\n",
+        "model.fit(X_train, y_train)\n",
+        "\n",
+        "# Make predictions on the test set\n",
+        "y_pred = model.predict(X_test)\n",
+        "\n",
+        "# Calculate accuracy and display classification report\n",
+        "accuracy = accuracy_score(y_test, y_pred)\n",
+        "report = classification_report(y_test, y_pred)\n",
+        "\n",
+        "print(\"Accuracy:\", accuracy)\n",
+        "print(\"Classification Report:\\n\", report)"
+      ]
+    }
+  ]
+}
