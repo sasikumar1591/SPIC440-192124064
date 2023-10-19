@@ -1,0 +1,39 @@
+import numpy as np
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.svm import SVC
+from sklearn.metrics import accuracy_score, classification_report
+
+# Load your historical gold price data into a Pandas DataFrame
+# Replace 'dataset.xlsx' with your data file or source
+data = pd.read_excel('dataset.3.xlsx')
+
+# Create a binary target variable based on some condition (e.g., price going up or down)
+data['Price_Direction'] = np.where(data['Price'].shift(-1) > data['Price'], 1, 0)
+
+# Drop the last row with NaN value created by the shift operation
+data = data.dropna()
+
+# Drop non-essential columns ('Date') and ensure all other columns are numeric
+data = data.select_dtypes(include=[np.number])
+
+# Split the data into features (X) and the target variable (y)
+X = data.drop(['Price_Direction'], axis=1)
+y = data['Price_Direction']
+
+# Split the data into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.8, random_state=30)
+
+# Create and fit the Support Vector Machine model
+model = SVC(kernel='linear', C=1.0)  # You can adjust the kernel and C parameter
+model.fit(X_train, y_train)
+
+# Make predictions on the test set
+y_pred = model.predict(X_test)
+
+# Calculate accuracy and display classification report
+accuracy = accuracy_score(y_test, y_pred)
+report = classification_report(y_test, y_pred)
+
+print("Accuracy:", accuracy)
+print("Classification Report:\n", report)
